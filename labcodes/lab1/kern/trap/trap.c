@@ -114,7 +114,7 @@ print_trapframe(struct trapframe *tf) {
     cprintf("  err  0x%08x\n", tf->tf_err);
     cprintf("  eip  0x%08x\n", tf->tf_eip);
     cprintf("  cs   0x----%04x\n", tf->tf_cs);
-
+    cprintf("  flag 0x%08x ", tf->tf_eflags);
 
     int i, j;
     for (i = 0, j = 1; i < sizeof(IA32flags) / sizeof(IA32flags[0]); i ++, j <<= 1) {
