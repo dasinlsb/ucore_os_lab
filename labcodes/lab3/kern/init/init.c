@@ -42,7 +42,9 @@ kern_init(void) {
     swap_init();                // init swap
 
     clock_init();               // init clock interrupt
+
     intr_enable();              // enable irq interrupt
+
 
     //LAB1: CAHLLENGE 1 If you try to do it, uncomment lab1_switch_test()
     // user/kernel mode switch test
@@ -93,11 +95,24 @@ lab1_print_cur_status(void) {
 static void
 lab1_switch_to_user(void) {
     //LAB1 CHALLENGE 1 : TODO
+    asm volatile (
+                  "sub $4, %%esp;"
+                  "pushl %%ebp;"
+                  "int %0;"
+                  :
+                  :"i"(T_SWITCH_TOU)
+                  );
 }
 
 static void
 lab1_switch_to_kernel(void) {
     //LAB1 CHALLENGE 1 :  TODO
+    asm volatile(
+                  "int %0;"
+                  "movl %%ebp, %%esp"
+                  :
+                  :"i"(T_SWITCH_TOK)
+                 );
 }
 
 static void
