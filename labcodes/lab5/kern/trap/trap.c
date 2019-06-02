@@ -58,10 +58,9 @@ idt_init(void) {
      //so you should setup the syscall interrupt gate in here
     extern uintptr_t __vectors[];
     for (int i = 0; i < 256; i++) {
-        SETGATE(idt[i], 0, GD_KTEXT, __vectors[i], 0);
-        if (i == T_SWITCH_TOK)
-            SETGATE(idt[i], 0, GD_KTEXT, __vectors[i], 3);
+        SETGATE(idt[i], 0, GD_KTEXT, __vectors[i], DPL_KERNEL);
     }
+    SETGATE(idt[T_SYSCALL], 1, GD_KTEXT, __vectors[T_SYSCALL], DPL_USER);
     lidt(&idt_pd);     
 }
 
@@ -231,7 +230,7 @@ trap_dispatch(struct trapframe *tf) {
          *    Every TICK_NUM cycle, you should set current process's current->need_resched = 1
          */
         if ((++ticks) % TICK_NUM == 0) {
-            print_ticks();
+            current->need_resched = 1;
         }
         break;
     case IRQ_OFFSET + IRQ_COM1:

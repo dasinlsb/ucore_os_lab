@@ -514,7 +514,7 @@ do_pgfault(struct mm_struct *mm, uint32_t error_code, uintptr_t addr) {
            // if this pte is a swap entry, then load data from disk to a page with phy addr
            // and call page_insert to map the phy addr with logical addr
            if(swap_init_ok) {               
-               if ((ret = swap_in(mm, addr, &page)) != 0) {
+               if (swap_in(mm, addr, &page)) {
                    cprintf("swap_in in do_pgfault failed\n");
                    goto failed;
                }    
