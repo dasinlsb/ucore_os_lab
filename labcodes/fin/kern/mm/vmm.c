@@ -493,6 +493,10 @@ do_pgfault(struct mm_struct *mm, uint32_t error_code, uintptr_t addr) {
         }
    }
 #endif
+    if (current != NULL) {
+        current->cnt_pgfault++;
+    }
+
     if ((ptep = get_pte(mm->pgdir, addr, 1)) == NULL) {
         cprintf("do_pgfault get_pte error!\n");
         goto failed;
@@ -515,7 +519,7 @@ do_pgfault(struct mm_struct *mm, uint32_t error_code, uintptr_t addr) {
             goto failed;
         }
         page_insert(mm->pgdir, page, addr, perm);
-        swap_map_swappable(mm, addr, page, 1); // ????? what is  @int swap_in
+        swap_map_swappable(mm, addr, page, 1);
         page->pra_vaddr = addr;        
     }
    ret = 0;
