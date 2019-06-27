@@ -38,6 +38,7 @@ struct context {
 #define MAX_PROCESS                 4096
 #define MAX_PID                     (MAX_PROCESS * 2)
 
+#define CNT_WORKING_SET             3
 extern list_entry_t proc_list;
 
 struct proc_struct {
@@ -66,6 +67,7 @@ struct proc_struct {
     uint32_t lab6_priority;                     // FOR LAB6 ONLY: the priority of process, set by lab6_set_priority(uint32_t)
     uint32_t fq_which;                          // FOR final project ONLY
     uint32_t cnt_pgfault;                       // FOR final project ONLY: how many times of page fault of this process
+    struct Page *working_set[CNT_WORKING_SET];                   // FOR final project ONLY
 };
 
 #define PF_EXITING                  0x00000001      // getting shutdown

@@ -141,6 +141,9 @@ alloc_proc(void) {
         proc->lab6_priority = 0;
         proc->fq_which = 0;
         proc->cnt_pgfault = 0;
+        for (int i = 0; i < CNT_WORKING_SET; i++) {
+            proc->working_set[i] = alloc_page();
+        }
     }
     return proc;
 }
