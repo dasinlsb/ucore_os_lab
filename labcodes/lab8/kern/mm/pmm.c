@@ -168,8 +168,27 @@ alloc_pages(size_t n) {
          if (page != NULL || n > 1 || swap_init_ok == 0) break;
          
          extern struct mm_struct *check_mm_struct;
+         extern list_entry_t proc_list;
+         list_entry_t *list = &proc_list, *le = list;
+         struct proc_struct *worst_proc = NULL, *cur_proc;
+         while((le = list_next(le)) != list) {
+             cur_proc = le2proc(le, list_link);
+             if (cur_proc->mm == NULL) continue;
+             if (worst_proc == NULL || 
+                worst_proc->cnt_pgfault > cur_proc->cnt_pgfault) {
+                worst_proc = cur_proc;
+            }
+         }
+         struct mm_struct *ptr_mm_struct;
+         if (worst_proc == NULL || worst_proc->mm == NULL) {
+             ptr_mm_struct = check_mm_struct;
+         }
+         else {
+             ptr_mm_struct = worst_proc->mm;
+         }
+        //  ptr_mm_struct = check_mm_struct;
          //cprintf("page %x, call swap_out in alloc_pages %d\n",page, n);
-         swap_out(check_mm_struct, n, 0);
+         swap_out(ptr_mm_struct, n, 0);
     }
     //cprintf("n %d,get page %x, No %d in alloc_pages\n",n,page,(page-pages));
     return page;

@@ -61,17 +61,34 @@ _fifo_map_swappable(struct mm_struct *mm, uintptr_t addr, struct Page *page, int
 static int
 _fifo_swap_out_victim(struct mm_struct *mm, struct Page ** ptr_page, int in_tick)
 {
-     list_entry_t *head=(list_entry_t*) mm->sm_priv;
-         assert(head != NULL);
-     assert(in_tick==0);
-     /* Select the victim */
-     /*LAB3 EXERCISE 2: YOUR CODE*/ 
-     //(1)  unlink the  earliest arrival page in front of pra_list_head qeueue
-     //(2)  assign the value of *ptr_page to the addr of this page
-     list_entry_t *le = list_next(head);
-     list_del(le);
-     *ptr_page = le2page(le, pra_page_link);
-     return 0;
+    list_entry_t *head = (list_entry_t *) mm->sm_priv;
+    assert(head != NULL);
+    assert(in_tick == 0);
+    /* Select the victim */
+    list_entry_t *le = list_next(head);
+    list_entry_t *early[4];
+    struct Page *page;
+    int i, state;
+    for (i = 0; i < 4; i++) early[i] = NULL;
+    for (; le != head; le = list_next(le)) {
+        if (le == &pra_list_head) continue;
+        state = 0;
+        page = le2page(le, pra_page_link);
+        pte_t *ptep = get_pte(mm->pgdir, page->pra_vaddr, 1);
+        if (*ptep & PTE_A) state |= 1 << 1;
+        if (*ptep & PTE_D) state |= 1 << 0;
+        if (early[state] == NULL) early[state] = le;
+    }
+    for (i = 0; i < 4; i++) {
+        if (early[i] != NULL) {
+            le = early[i];
+            mm->sm_priv = list_prev(le);
+            list_del(le);
+            *ptr_page = le2page(le, pra_page_link);
+            return 0;
+        }
+    }
+    return -1;
 }
 
 static int

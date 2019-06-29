@@ -493,6 +493,9 @@ do_pgfault(struct mm_struct *mm, uint32_t error_code, uintptr_t addr) {
         }
    }
 #endif
+    if (current != NULL) {
+        current->cnt_pgfault++;
+    }
     if ((ptep = get_pte(mm->pgdir, addr, 1)) == NULL) {
         cprintf("do_pgfault get_pte error!\n");
         goto failed;

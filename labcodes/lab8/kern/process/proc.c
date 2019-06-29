@@ -145,6 +145,7 @@ alloc_proc(void) {
         proc->lab6_priority = 0;
         proc->filesp = NULL;
         proc->fq_which = 0;
+        proc->cnt_pgfault = 0;
     }
     return proc;
 }
