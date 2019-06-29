@@ -365,7 +365,7 @@ default_check() {
     '++ setup timer interrupts'
 }
 
-## check now!!
+# check now!!
 
 run_test -prog 'badsegment' -check default_check                \
       - 'kernel_execve: pid = ., name = "badsegment".*'          \

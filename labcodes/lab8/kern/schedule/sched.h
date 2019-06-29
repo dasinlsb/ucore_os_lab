@@ -7,6 +7,9 @@
 
 #define MAX_TIME_SLICE 5
 
+#define FQUEUES 6
+#define MIN_FQUEUE_SLICE 2
+
 struct proc_struct;
 
 typedef struct {

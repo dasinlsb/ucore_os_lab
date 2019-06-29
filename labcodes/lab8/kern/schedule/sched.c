@@ -11,46 +11,65 @@ static list_entry_t timer_list;
 
 static struct sched_class *sched_class;
 
-static struct run_queue *rq;
+// static struct run_queue *rq;
+static struct run_queue *rqs[FQUEUES];
 
 static inline void
 sched_class_enqueue(struct proc_struct *proc) {
     if (proc != idleproc) {
-        sched_class->enqueue(rq, proc);
+        sched_class->enqueue(rqs[proc->fq_which], proc);
     }
 }
 
 static inline void
 sched_class_dequeue(struct proc_struct *proc) {
-    sched_class->dequeue(rq, proc);
+    sched_class->dequeue(rqs[proc->fq_which], proc);
+    if (proc->fq_which + 1 < FQUEUES) {
+        proc->fq_which++;
+    }
 }
 
 static inline struct proc_struct *
 sched_class_pick_next(void) {
-    return sched_class->pick_next(rq);
+    int i;
+    struct proc_struct *proc;
+    for (i = 0; i < FQUEUES; i++) {
+        if ((proc = sched_class->pick_next(rqs[i])) != NULL) {
+            return proc;
+        }
+    }
+    return NULL;
 }
 
 static void
 sched_class_proc_tick(struct proc_struct *proc) {
     if (proc != idleproc) {
-        sched_class->proc_tick(rq, proc);
+        sched_class->proc_tick(rqs[proc->fq_which], proc);
     }
     else {
         proc->need_resched = 1;
     }
 }
 
-static struct run_queue __rq;
+// static struct run_queue __rq;
+static struct run_queue __rqs[FQUEUES];
 
 void
 sched_init(void) {
     list_init(&timer_list);
 
     sched_class = &default_sched_class;
-
-    rq = &__rq;
-    rq->max_time_slice = MAX_TIME_SLICE;
-    sched_class->init(rq);
+    int i;
+    for (i = 0; i < FQUEUES; i++) {
+        rqs[i] = &__rqs[i];
+        if (i == 0) {
+            rqs[i]->max_time_slice = MIN_FQUEUE_SLICE;
+        }
+        else {
+            rqs[i]->max_time_slice = rqs[i - 1]->max_time_slice * 2;
+        }
+        sched_class->init(rqs[i]);
+    }
 
     cprintf("sched class: %s\n", sched_class->name);
 }
